@@ -121,6 +121,7 @@ class vacation extends rcube_plugin {
         $input_vacmessage = new html_textarea(array(
             'name' => $field_id,
             'id' => $field_id,
+            'class' => 'mce_editor',
             'rows' => 20,
         ));
         $table->add('title', html::label($field_id, rcube::Q($this->gettext('vacmessage'))));
