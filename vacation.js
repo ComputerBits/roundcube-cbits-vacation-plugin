@@ -24,21 +24,17 @@ window.tinymce && tinymce.init({
     },
 })
 
-function trigger_enable_checkbox_change(e) {
-    console.log("trigger");
+function trigger_enable_checkbox_change() {
     if ($('#vacenabled').prop('checked')) {
-        $('#vacsubject').prop("disabled", false);
-        $('#vacmessage').prop("disabled", false);
-        $('#vacforward').prop("disabled", false);
-        tinymce.get('vacmessage').show();
+        $('[id^=vac]').not('#vacenabled').parents('#vacation-form .propform tr').show();
     } else {
-        $('#vacsubject').prop("disabled", true);
-        $('#vacmessage').prop("disabled", true);
-        $('#vacforward').prop("disabled", true);
-        tinymce.get('vacmessage').hide();
+        $('[id^=vac]').not('#vacenabled').parents('#vacation-form .propform tr').hide();
     }
 }
 
 $(document).ready(function(){
+    $('[id^=vac]').not('#vacenabled').parents('#vacation-form .propform tr').hide();
     $('#vacenabled').change(trigger_enable_checkbox_change);
+    $('#vacstartdate').datepicker({dateFormat: "yy-mm-dd"});
+    $('#vacenddate').datepicker({dateFormat: "yy-mm-dd"});
 });
