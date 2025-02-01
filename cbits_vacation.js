@@ -1,5 +1,5 @@
 window.rcmail && rcmail.addEventListener('init', function(evt) {
-    rcmail.register_command('plugin.vacation-save', function() {
+    rcmail.register_command('plugin.cbits_vacation.save', function() {
           rcmail.gui_objects.vacform.submit();
     }, true);
 

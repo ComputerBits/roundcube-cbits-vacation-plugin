@@ -2,7 +2,7 @@
 
 require 'drivers/vacationdriver.php';
 
-class vacation extends rcube_plugin {
+class cbits_vacation extends rcube_plugin {
     public $noframe = true;
     public $noajax = true;
     private $rc;
@@ -12,17 +12,17 @@ class vacation extends rcube_plugin {
         $this->add_texts('localization/');
         $this->load_driver();
         $this->add_hook('settings_actions', array($this, 'settings_actions'));
-        $this->register_action('plugin.vacation', array($this, 'vacation_init'));
-        $this->register_action('plugin.vacation-save', array($this, 'vacation_save'));
+        $this->register_action('plugin.cbits_vacation', array($this, 'vacation_init'));
+        $this->register_action('plugin.cbits_vacation.save', array($this, 'vacation_save'));
     }
 
     function settings_actions($args) {
         $args['actions'][] = array(
-            'action' => 'plugin.vacation',
+            'action' => 'plugin.cbits_vacation',
             'class' => 'vacation',
             'label' => 'setvacation',
             'title' => 'setvacation',
-            'domain' => 'vacation',
+            'domain' => 'cbits_vacation',
         );
         return $args;
     }
@@ -51,7 +51,7 @@ class vacation extends rcube_plugin {
         } else {
             $this->rc->output->command('display_message', 'Out of Office settings not saved', 'error');
         }
-        $this->rc->overwrite_action('plugin.vacation');
+        $this->rc->overwrite_action('plugin.cbits_vacation');
         $this->rc->output->send('plugin');
     }
 
@@ -138,7 +138,7 @@ class vacation extends rcube_plugin {
         $table->add_row();
 
         $submit_button = $this->rc->output->button(array(
-            'command' => 'plugin.vacation-save',
+            'command' => 'plugin.cbits_vacation.save',
             'class' => 'button mainaction submit',
             'label' => 'save',
         ));
@@ -146,13 +146,13 @@ class vacation extends rcube_plugin {
 
         $this->rc->output->add_gui_object('vacform', 'vacation-form');
 
-        $this->include_script('vacation.js');
+        $this->include_script('cbits_vacation.js');
 
         $form = $this->rc->output->form_tag(array(
             'id' => 'vacation-form',
             'name' => 'vacation-form',
             'method' => 'post',
-            'action' => './?_task=settings&_action=plugin.vacation-save',
+            'action' => './?_task=settings&_action=plugin.cbits_vacation.save',
         ), $table->show());
 
         return ""
