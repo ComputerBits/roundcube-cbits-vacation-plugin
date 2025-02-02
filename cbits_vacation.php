@@ -94,9 +94,9 @@ class cbits_vacation extends rcube_plugin {
         $fields = [
             'active' => [
                 html::label('active', rcube::Q($this->gettext('vacenabled'))),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show('off') . "Off"),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show('on-indef') . "Enabled indefinitely"),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show('on-dates') . "Enabled between date range"),
+                html::label([], (new html_radiobutton(['name' => 'active']))->show('off', ['value' => 'off']) . "Off"),
+                html::label([], (new html_radiobutton(['name' => 'active']))->show('on-indef', ['value' => 'on-indef']) . "Enabled indefinitely"),
+                html::label([], (new html_radiobutton(['name' => 'active']))->show('on-dates', ['value' => 'on-dates']) . "Enabled between date range"),
             ],
             'start_datetime' => [
                 html::label('start_datetime', rcube::Q($this->gettext('vacstartdate'))),
