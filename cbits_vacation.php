@@ -88,12 +88,15 @@ class cbits_vacation extends rcube_plugin {
 
         $this->rc->html_editor('identity');
 
+        $start_datetime = $data['start_datetime']->format('Y-m-d\TH:i');
+        $end_datetime = $data['end_datetime']->format('Y-m-d\TH:i');
+
         $fields = [
             'active' => [
                 html::label('active', rcube::Q($this->gettext('vacenabled'))),
-                (new html_radiobutton(['name' => 'active']))->show('off'),
-                (new html_radiobutton(['name' => 'active']))->show('on-indef'),
-                (new html_radiobutton(['name' => 'active']))->show('on-dates'),
+                html::label([], (new html_radiobutton(['name' => 'active']))->show('off') . "Off"),
+                html::label([], (new html_radiobutton(['name' => 'active']))->show('on-indef') . "Enabled indefinitely"),
+                html::label([], (new html_radiobutton(['name' => 'active']))->show('on-dates') . "Enabled between date range"),
             ],
             'start_datetime' => [
                 html::label('start_datetime', rcube::Q($this->gettext('vacstartdate'))),
@@ -109,7 +112,7 @@ class cbits_vacation extends rcube_plugin {
             ],
             'message' => [
                 html::label('forwarding_address', rcube::Q($this->gettext('vacmessage'))),
-                (new html_textarea(['name' => 'message']))->show($data['body'], ['class' => 'mce_editor']),
+                (new html_textarea(['name' => 'message', 'id' => 'vacation-message']))->show($data['message'], ['class' => 'mce_editor']),
             ],
             'save' => [
                 $this->rc->output->button(array(
@@ -123,7 +126,7 @@ class cbits_vacation extends rcube_plugin {
         $output = '';
 
         foreach ($fields as $id => $field) {
-            $output .= html::div(['id' => "vacation-$id"], join('', $field));
+            $output .= html::div(['id' => "vacation-$id-row"], join('', $field));
         }
 
         $this->rc->output->add_gui_object('vacform', 'cbits_vacation-form');

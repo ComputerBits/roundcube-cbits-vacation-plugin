@@ -2,6 +2,8 @@
 require('twentyi_rest_api.class.php');
 
 class rcube_twentyi_vacation extends vacationdriver {
+    public twentyi_rest_api $rest;
+
     public function init() {
         $token = $this->rc->config->get('vacation_20i_token');
         $this->rest = new twentyi_rest_api($token);
@@ -22,18 +24,17 @@ class rcube_twentyi_vacation extends vacationdriver {
                     'message' => $responder->content,
                     'forward' => $responder->forwardTo,
                     'enabled' => $responder->enabled,
-                    'start_datetime' => (!is_null($start_datetime) ? $start_datetime->format('Y-m-d\TH:i') : ''),
-                    'end_datetime' => (!is_null($end_datetime) ? $end_datetime->format('Y-m-d\TH:i') : ''),
+                    'start_datetime' => $start_datetime,
+                    'end_datetime' => $end_datetime,
                 ];
             }
         }
         return [
-            'subject' => '',
-            'body' => '',
-            'forward' => '',
+            'message' => null,
+            'forward' => null,
             'enabled' => false,
-            'start_datetime' => '',
-            'end_datetime' => '',
+            'start_datetime' => null,
+            'end_datetime' => null,
         ];
     }
 

@@ -2,6 +2,7 @@
 
 abstract class vacationdriver {
     public $user;
+    public $rc;
 
     abstract function init();
 
