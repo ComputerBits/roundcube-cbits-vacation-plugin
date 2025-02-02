@@ -43,6 +43,9 @@ class rcube_twentyi_vacation extends vacationdriver {
         $domain_name = $this->user->domain;
         $domain = $this->rest->getWithFields('https://api.20i.com/package/' . $domain_name . '/email/' . $domain_name);
 
+        $end_datetime = $data['end_datetime'] ? $data['end_datetime']->format(DateTimeInterface::RFC3339_EXTENDED) : null;
+        $start_datetime = $data['start_datetime'] ? $data['start_datetime']->format(DateTimeInterface::RFC3339_EXTENDED) : null;
+
         foreach ($domain->responder as $responder) {
             if ($responder->local == $local && (str_starts_with($responder->id, 'r'))) {
                 $data = [
@@ -53,8 +56,8 @@ class rcube_twentyi_vacation extends vacationdriver {
                             'forwardTo' => $data['forward'],
                             'enabled' => $data['enabled'],
                             'type' => 'text/html',
-                            'endTime' => $data['end_datetime']->format(DateTimeInterface::RFC3339_EXTENDED),
-                            'startTime' => $data['start_datetime']->format(DateTimeInterface::RFC3339_EXTENDED),
+                            'endTime' => $end_datetime,
+                            'startTime' => $start_datetime,
                         ]
                     ]
                 ];
