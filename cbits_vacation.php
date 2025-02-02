@@ -91,12 +91,22 @@ class cbits_vacation extends rcube_plugin {
         $start_datetime = is_null($data['start_datetime']) ? null : $data['start_datetime']->format('Y-m-d\TH:i');
         $end_datetime = is_null($data['end_datetime']) ? null : $data['end_datetime']->format('Y-m-d\TH:i');
 
+        if ($data['enabled'] == true) {
+            if ($data['start_datetime'] !== null && $data['end_datetime'] !== null) {
+                $active = "on-dates";
+            } else {
+                $active = "on-indef";
+            }
+        } else {
+            $active = "off";
+        }
+
         $fields = [
             'active' => [
                 html::label('active', rcube::Q($this->gettext('vacenabled'))),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show('off', ['value' => 'off']) . "Off"),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show('on-indef', ['value' => 'on-indef']) . "Enabled indefinitely"),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show('on-dates', ['value' => 'on-dates']) . "Enabled between date range"),
+                html::label([], (new html_radiobutton(['name' => 'active']))->show($active, ['value' => 'off']) . "Off"),
+                html::label([], (new html_radiobutton(['name' => 'active']))->show($active, ['value' => 'on-indef']) . "Enabled indefinitely"),
+                html::label([], (new html_radiobutton(['name' => 'active']))->show($active, ['value' => 'on-dates']) . "Enabled between date range"),
             ],
             'start_datetime' => [
                 html::label('start_datetime', rcube::Q($this->gettext('vacstartdate'))),
