@@ -88,8 +88,8 @@ class cbits_vacation extends rcube_plugin {
 
         $this->rc->html_editor('identity');
 
-        $start_datetime = $data['start_datetime']->format('Y-m-d\TH:i');
-        $end_datetime = $data['end_datetime']->format('Y-m-d\TH:i');
+        $start_datetime = $data['start_datetime'] ? null : $data['start_datetime']->format('Y-m-d\TH:i');
+        $end_datetime = $data['end_datetime']? null : $data['end_datetime']->format('Y-m-d\TH:i');
 
         $fields = [
             'active' => [
