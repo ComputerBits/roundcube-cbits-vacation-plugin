@@ -3,8 +3,8 @@
 require 'drivers/vacationdriver.php';
 
 class cbits_vacation extends rcube_plugin {
-    public $noframe = true;
-    public $noajax = true;
+//    public $noframe = true;
+//    public $noajax = true;
     private $rc;
     public $data;
 
@@ -14,7 +14,7 @@ class cbits_vacation extends rcube_plugin {
         $this->load_driver();
         $this->add_hook('settings_actions', array($this, 'settings_actions'));
         $this->register_action('plugin.cbits_vacation', array($this, 'vacation_init'));
-        $this->register_action('plugin.cbits_vacation.save', array($this, 'vacation_save'));
+//        $this->rc->output->add_handler('plugin.cbits_vacation.save', array($this, 'vacation_save'));
     }
 
     function settings_actions($args) {
@@ -29,9 +29,21 @@ class cbits_vacation extends rcube_plugin {
     }
 
     function vacation_init() {
-        $this->register_handler('plugin.body', array($this, 'vacation_form'));
+        $this->get();
         $this->rc->output->set_pagetitle($this->gettext('setvacation'));
-        $this->rc->output->send('plugin');
+        $this->rc->output->add_handler('plugin.cbits_vacation.form.active', array($this, 'render_active'));
+        $this->rc->output->add_handler('plugin.cbits-vacation.form.start_datetime', array($this, 'render_start_datetime'));
+        $this->rc->output->add_handler('plugin.cbits-vacation.form.end_datetime', array($this, 'render_end_datetime'));
+        $this->rc->output->add_handler('plugin.cbits-vacation.form.forwarding_address', array($this, 'render_forwarding_address'));
+        $this->rc->output->add_handler('plugin.cbits-vacation.form.message', array($this, 'render_message'));
+        $this->rc->output->add_gui_object('plugin.cbits_vacation.form.active', 'vacation-active');
+        $this->rc->output->add_gui_object('plugin.cbits-vacation.form.start_datetime', 'vacation-start_datetime');
+        $this->rc->output->add_gui_object('plugin.cbits-vacation.form.end_datetime', 'vacation-end_datetime');
+        $this->rc->output->add_gui_object('plugin.cbits-vacation.form.forwarding_address', 'vacation-forwarding_address');
+        $this->rc->output->add_gui_object('plugin.cbits-vacation.form.message', 'vacation-message');
+        $this->rc->html_editor('identity');
+        $this->include_script('cbits_vacation.js');
+        $this->rc->output->send('cbits_vacation.out_of_office_form');
     }
 
     function vacation_save() {
@@ -99,70 +111,24 @@ class cbits_vacation extends rcube_plugin {
     }
 
     function send_error($error) {
-        $this->rc->output->command('display_message', $error, 'error');
-        $this->rc->overwrite_action('plugin.cbits_vacation');
-        $this->rc->output->send('plugin');
+//        $this->rc->output->command('display_message', $error, 'error');
+//        $this->rc->overwrite_action('plugin.cbits_vacation');
+//        $this->rc->output->send('plugin');
     }
 
     // creates form from data on backend
     function vacation_form() {
-        $this->data = $this->get();
-        return $this->create_form();
+//        $this->data = $this->get();
+//        $this->create_form();
     }
 
     // creates form from data stored in object
     function create_form() {
-        $data = $this->data;
-        $this->rc->html_editor('identity');
-
-        $fields = [
-            'active' => [
-                html::label('active', rcube::Q($this->gettext('vacenabled'))),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'off']) . "Off"),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'on-indef']) . "Enabled indefinitely"),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'on-dates']) . "Enabled between date range"),
-            ],
-            'start_datetime' => [
-                html::label('start_datetime', rcube::Q($this->gettext('vacstartdate'))),
-                (new html_inputfield(['name' => 'start_datetime', 'type' => 'datetime-local']))->show($data['start_datetime']),
-            ],
-            'end_datetime' => [
-                html::label('end_datetime', rcube::Q($this->gettext('vacenddate'))),
-                (new html_inputfield(['name' => 'end_datetime', 'type' => 'datetime-local']))->show($data['end_datetime']),
-            ],
-            'forwarding_address' => [
-                html::label('forwarding_address', rcube::Q($this->gettext('vacforward'))),
-                (new html_inputfield(['name' => 'forwarding_address', 'type' => 'email']))->show($data['forward']),
-            ],
-            'message' => [
-                html::label('forwarding_address', rcube::Q($this->gettext('vacmessage'))),
-                (new html_textarea(['name' => 'message', 'id' => 'vacation-message']))->show($data['message'], ['class' => 'mce_editor']),
-            ],
-            'save' => [
-                $this->rc->output->button(array(
-                    'command' => 'plugin.cbits_vacation.save',
-                    'class' => 'button mainaction submit',
-                    'label' => 'save',
-                ))
-            ]
-        ];
-
-        $output = '';
-
-        foreach ($fields as $id => $field) {
-            $output .= html::div(['id' => "vacation-$id-row"], join('', $field));
-        }
-
-        $this->rc->output->add_gui_object('vacform', 'cbits_vacation-form');
-
-        $this->include_script('cbits_vacation.js');
-
-        return $this->rc->output->form_tag(array(
-            'id' => 'cbits_vacation-form',
-            'name' => 'cbits_vacation-form',
-            'method' => 'post',
-            'action' => './?_task=settings&_action=plugin.cbits_vacation.save',
-        ), $output);
+//        $this->rc->html_editor('identity');
+//        $this->rc->output->add_gui_object('vacform', 'cbits_vacation-form');
+//        $this->include_script('cbits_vacation.js');
+//        $this->rc->output->add_gui_object('activebutton', 'activebutton');
+//        $this->rc->output->send('cbits_vacation.out_of_office_form');
     }
 
     function get() {
@@ -223,4 +189,43 @@ class cbits_vacation extends rcube_plugin {
         return true;
     }
 
+    function render_active($attrib) {
+        return join('', [
+            html::label('active', rcube::Q($this->gettext('vacenabled'))),
+            html::label('off', "Off"),
+            (new html_radiobutton(['name' => 'active']))->show($this->data['active'], ['id' => 'off', 'value' => 'off']),
+            html::label('on-indef', "Enabled indefinitely"),
+            (new html_radiobutton(['name' => 'active']))->show($this->data['active'], ['id' => 'on-indef', 'value' => 'on-indef']),
+            html::label('on-dates', "Enabled between date range"),
+            (new html_radiobutton(['name' => 'active']))->show($this->data['active'], ['id' => 'on-dates', 'value' => 'on-dates']),
+        ]);
+    }
+
+    function render_start_datetime($attrib) {
+        return html::div(['id' => 'vacation-start_datetime'], join('', [
+            html::label('start_datetime', rcube::Q($this->gettext('vacstartdate'))),
+            (new html_inputfield(['name' => 'start_datetime', 'type' => 'datetime-local', 'class' => $attrib['inputclass']]))->show($this->data['start_datetime']),
+        ]));
+    }
+
+    function render_end_datetime($attrib) {
+        return html::div(['id' => 'vacation-end_datetime'], join('', [
+            html::label('start_datetime', rcube::Q($this->gettext('vacstartdate'))),
+            (new html_inputfield(['name' => 'start_datetime', 'type' => 'datetime-local', 'class' => $attrib['inputclass']]))->show($this->data['start_datetime']),
+        ]));
+    }
+
+    function render_forwarding_address($attrib) {
+        return html::div(['id' => 'vacation-forwarding_address'], join('', [
+            html::label('forwarding_address', rcube::Q($this->gettext('vacforward'))),
+            (new html_inputfield(['name' => 'forwarding_address', 'type' => 'email', 'class' => $attrib['inputclass']]))->show($this->data['forward']),
+        ]));
+    }
+
+    function render_message($attrib) {
+        return html::div(['id' => 'vacation-message-container'], join('', [
+            html::label('message', rcube::Q($this->gettext('vacmessage'))),
+            (new html_textarea(['name' => 'message', 'id' => 'vacation-message', 'class' => $attrib['inputclass']]))->show($this->data['message'], ['class' => 'mce_editor']),
+        ]));
+    }
 }

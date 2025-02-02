@@ -5,6 +5,10 @@ window.rcmail && rcmail.addEventListener('init', function(evt) {
 
     new rcube_text_editor({}, 'vacation-message');
 
+    $('input[type=radio][name=active]').checkboxradio({
+        icon: false
+    });
+
     $('input[type=radio][name=active]').change(function () {
         update_hidden_fields(this.value)
     })

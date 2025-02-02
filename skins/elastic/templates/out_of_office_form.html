@@ -1,0 +1,25 @@
+<roundcube:include file="includes/layout.html" />
+<roundcube:include file="includes/menu.html" />
+<roundcube:include file="includes/settings-menu.html" />
+
+<!--<h1 class="voice"><roundcube:label name="settings" /> : <roundcube:label name="setvacation" /></h1>-->
+
+<form>
+    <div class="form-group">
+        <label>Autoresponder status</label>
+        <roundcube:object id="vacation-active" name="plugin.cbits_vacation.form.active" />
+    </div>
+    <div id="vacation-start_datetime-row" class="form-group">
+        <roundcube:object id="vacation-start_datetime" name="plugin.cbits-vacation.form.start_datetime" inputclass="form-control" />
+    </div>
+    <div id="vacation-end_datetime-row" class="form-group">
+        <roundcube:object id="vacation-end_datetime" name="plugin.cbits-vacation.form.end_datetime" inputclass="form-control" />
+    </div>
+    <div id="vacation-forwarding_address-row" class="form-group">
+        <roundcube:object id="vacation-forwarding_address" name="plugin.cbits-vacation.form.forwarding_address" inputclass="form-control" />
+    </div>
+    <div class="form-group">
+        <roundcube:object id="vacation-message" name="plugin.cbits-vacation.form.message" inputclass="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
