@@ -60,16 +60,16 @@ class cbits_vacation extends rcube_plugin {
             $data['enabled'] = true;
             $data['start_datetime'] = DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $data['start_datetime']);
             if ($data['start_datetime'] === false) {
-                $data['start_datetime'] = null;
+                $this->send_error("Start datetime is in an invalid format, needs to be in form of " . date('Y-m-d\TH:i'));
+                return;
             }
             $data['end_datetime'] = DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $data['end_datetime']);
             if ($data['end_datetime'] === false) {
-                $data['end_datetime'] = null;
+                $this->send_error("End datetime is in an invalid format, needs to be in form of " . date('Y-m-d\TH:i'));
+                return;
             }
         } else {
-            $this->rc->output->command('display_message', 'Out of Office settings not saved', 'error');
-            $this->rc->overwrite_action('plugin.cbits_vacation');
-            $this->rc->output->send('plugin');
+            $this->send_error('Invalid value for "enabled" field');
             return;
         }
 
@@ -79,6 +79,12 @@ class cbits_vacation extends rcube_plugin {
             $this->rc->output->command('display_message', 'Out of Office settings not saved', 'error');
         }
 
+        $this->rc->overwrite_action('plugin.cbits_vacation');
+        $this->rc->output->send('plugin');
+    }
+
+    function send_error($error) {
+        $this->rc->output->command('display_message', $error, 'error');
         $this->rc->overwrite_action('plugin.cbits_vacation');
         $this->rc->output->send('plugin');
     }
