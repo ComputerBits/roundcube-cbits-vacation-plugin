@@ -6,22 +6,22 @@ window.rcmail && rcmail.addEventListener('init', function(evt) {
     $('input:not(:hidden)').first().focus();
 });
 
-function trigger_enable_checkbox_change() {
-    if ($('#vacenabled').prop('checked')) {
-        $('[id^=vac]').not('#vacenabled').parents('#vacation-form .propform tr').show();
-    } else {
-        $('[id^=vac]').not('#vacenabled').parents('#vacation-form .propform tr').hide();
-    }
-}
+// function trigger_enable_checkbox_change() {
+//     if ($('#vacenabled').prop('checked')) {
+//         $('[id^=vac]').not('#vacenabled').parents('#vacation-form .propform tr').show();
+//     } else {
+//         $('[id^=vac]').not('#vacenabled').parents('#vacation-form .propform tr').hide();
+//     }
+// }
 
-window.rcmail && rcmail.addEventListener('editor-load', function() {
-    trigger_enable_checkbox_change()
-})
+// window.rcmail && rcmail.addEventListener('editor-load', function() {
+//     trigger_enable_checkbox_change()
+// })
 
 $(document).ready(function(){
-    new rcube_text_editor({}, 'vacmessage');
-    $('[id^=vac]').not('#vacenabled').parents('#vacation-form .propform tr').hide();
-    $('#vacenabled').change(trigger_enable_checkbox_change);
-    $('#vacstartdate').datepicker({dateFormat: "yy-mm-dd"});
-    $('#vacenddate').datepicker({dateFormat: "yy-mm-dd"});
+    new rcube_text_editor({}, 'vacation-message');
+    // $('[id^=vac]').not('#vacenabled').parents('#vacation-form .propform tr').hide();
+    // $('#vacenabled').change(trigger_enable_checkbox_change);
+    // $('#vacstartdate').datepicker({dateFormat: "yy-mm-dd"});
+    // $('#vacenddate').datepicker({dateFormat: "yy-mm-dd"});
 });

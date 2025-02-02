@@ -56,9 +56,7 @@ class twentyi_rest_api {
     }
 
     public function postWithFields($url, $fields, $options = []) {
-        $original_headers = isset($options[CURLOPT_HTTPHEADER]) ?
-            $options[CURLOPT_HTTPHEADER] :
-            [];
+        $original_headers = $options[CURLOPT_HTTPHEADER] ?? [];
         unset($options[CURLOPT_HTTPHEADER]);
         $response = $this->sendRequest($url, [
                 CURLOPT_HTTPHEADER => $original_headers + [

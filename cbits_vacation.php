@@ -36,21 +36,49 @@ class cbits_vacation extends rcube_plugin {
     function vacation_save() {
         $this->register_handler('plugin.body', array($this, 'vacation_form'));
         $this->rc->output->set_pagetitle($this->gettext('setvacation'));
-        $vacsettings = [
-            'enabled' => rcube_utils::get_input_value('vacenabled', rcube_utils::INPUT_POST) == "on" ? true : false,
-            //      'subject' => rcube_utils::get_input_value('vacsubject', rcube_utils::INPUT_POST),
-            'message' => rcube_utils::get_input_value('vacmessage', rcube_utils::INPUT_POST, true),
-            'forward' => rcube_utils::get_input_value('vacforward', rcube_utils::INPUT_POST),
-            'enddate' => rcube_utils::get_input_value('vacenddate', rcube_utils::INPUT_POST),
-            'startdate' => rcube_utils::get_input_value('vacstartdate', rcube_utils::INPUT_POST),
-            'endtime' => rcube_utils::get_input_value('vacendtime', rcube_utils::INPUT_POST),
-            'starttime' => rcube_utils::get_input_value('vacstarttime', rcube_utils::INPUT_POST),
+
+        $data = [
+            'message' => rcube_utils::get_input_value('message', rcube_utils::INPUT_POST, true),
+            'forward' => rcube_utils::get_input_value('forwarding_address', rcube_utils::INPUT_POST),
         ];
-        if ($this->save($vacsettings)) {
+
+        if (trim($data['forward']) == '') {
+            $data['forward'] = null;
+        }
+
+        $active = rcube_utils::get_input_value('active', rcube_utils::INPUT_POST);
+
+        if ($active == "off") {
+            $data['enabled'] = false;
+            $data['start_datetime'] = null;
+            $data['end_datetime'] = null;
+        } elseif ($active == "on-indef") {
+            $data['enabled'] = true;
+            $data['start_datetime'] = null;
+            $data['end_datetime'] = null;
+        } elseif ($active == "on-dates") {
+            $data['enabled'] = true;
+            $data['start_datetime'] = DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $data['start_datetime']);
+            if ($data['start_datetime'] === false) {
+                $data['start_datetime'] = null;
+            }
+            $data['end_datetime'] = DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $data['end_datetime']);
+            if ($data['end_datetime'] === false) {
+                $data['end_datetime'] = null;
+            }
+        } else {
+            $this->rc->output->command('display_message', 'Out of Office settings not saved', 'error');
+            $this->rc->overwrite_action('plugin.cbits_vacation');
+            $this->rc->output->send('plugin');
+            return;
+        }
+
+        if ($this->save($data)) {
             $this->rc->output->command('display_message', 'Out of Office settings saved successfully', 'confirmation');
         } else {
             $this->rc->output->command('display_message', 'Out of Office settings not saved', 'error');
         }
+
         $this->rc->overwrite_action('plugin.cbits_vacation');
         $this->rc->output->send('plugin');
     }
@@ -59,123 +87,63 @@ class cbits_vacation extends rcube_plugin {
         $data = $this->get();
 
         $this->rc->html_editor('identity');
-        $table = new html_table(array('cols' => 3, 'class' => 'propform'));
 
-        $field_id = 'vacenabled';
-        $input_vacenabled = new html_checkbox(array(
-            'name' => $field_id,
-            'id' => $field_id,
-            'style' => 'width:30px;',
-        ));
-        $table->add('title', html::label($field_id, rcube::Q($this->gettext('vacenabled'))));
-        $table->add(['class' => 'col-sm-1'], $input_vacenabled->show(!$data['enabled']));
-        $table->add_row();
+        $fields = [
+            'active' => [
+                html::label('active', rcube::Q($this->gettext('vacenabled'))),
+                (new html_radiobutton(['name' => 'active']))->show('off'),
+                (new html_radiobutton(['name' => 'active']))->show('on-indef'),
+                (new html_radiobutton(['name' => 'active']))->show('on-dates'),
+            ],
+            'start_datetime' => [
+                html::label('start_datetime', rcube::Q($this->gettext('vacstartdate'))),
+                (new html_inputfield(['name' => 'start_datetime', 'type' => 'datetime-local']))->show($start_datetime),
+            ],
+            'end_datetime' => [
+                html::label('end_datetime', rcube::Q($this->gettext('vacenddate'))),
+                (new html_inputfield(['name' => 'end_datetime', 'type' => 'datetime-local']))->show($end_datetime),
+            ],
+            'forwarding_address' => [
+                html::label('forwarding_address', rcube::Q($this->gettext('vacforward'))),
+                (new html_inputfield(['name' => 'forwarding_address', 'type' => 'email']))->show($data['forward']),
+            ],
+            'message' => [
+                html::label('forwarding_address', rcube::Q($this->gettext('vacmessage'))),
+                (new html_textarea(['name' => 'message']))->show($data['body'], ['class' => 'mce_editor']),
+            ],
+            'save' => [
+                $this->rc->output->button(array(
+                    'command' => 'plugin.cbits_vacation.save',
+                    'class' => 'button mainaction submit',
+                    'label' => 'save',
+                ))
+            ]
+        ];
 
-        $table->add(null, '<p id="vacdatetimemessage">' . $this->gettext('vacdateinstructions') . '</p>');
-        $table->add_row();
+        $output = '';
 
-        $input_vacstartdate = new html_inputfield([
-            'name' => 'vacstartdate',
-            'id' => 'vacstartdate',
-            'placeholder' => (new DateTime())->format('Y-m-d'),
-            'width' => '50%',
-        ]);
-        $input_vacstarttime = new html_inputfield([
-            'name' => 'vacstarttime',
-            'id' => 'vacstarttime',
-            'placeholder' => '00:00',
-            'width' => '50%',
-        ]);
+        foreach ($fields as $id => $field) {
+            $output .= html::div(['id' => "vacation-$id"], join('', $field));
+        }
 
-        $table->add('title col-sm-4', html::label('vacstartdate', rcube::Q($this->gettext('vacstartdate'))));
-        $table->add(['class' => 'col-sm-4'], $input_vacstartdate->show($data['startdate']));
-        $table->add(['class' => 'col-sm-4'], $input_vacstarttime->show($data['starttime']));
-        $table->add_row();
-
-        $input_vacendtime = new html_inputfield([
-            'name' => 'vacendtime',
-            'id' => 'vacendtime',
-            'placeholder' => '00:00',
-            'width' => '50%',
-        ]);
-        $input_enddate = new html_inputfield([
-            'name' => 'vacenddate',
-            'id' => 'vacenddate',
-            'placeholder' => (new DateTime())->add(DateInterval::createFromDateString('3 months'))->format('Y-m-d'),
-            'width' => '50%',
-        ]);
-        $table->add('title col-sm-4', html::label('vacenddate', rcube::Q($this->gettext('vacenddate'))));
-        $table->add(['class' => 'col-sm-4'], $input_enddate->show($data['enddate']));
-        $table->add(['class' => 'col-sm-4'], $input_vacendtime->show($data['endtime']));
-
-//        $field_id = 'vacsubject';
-//        $input_vacsubject = new html_inputfield(array(
-//            'name' => $field_id,
-//            'id' => $field_id,
-//        ));
-//        $table->add('title', html::label($field_id, rcube::Q($this->gettext('vacsubject'))));
-//        $table->add(["colspan" => 2], $input_vacsubject->show($data['subject']));
-//        $table->add_row();
-
-        $field_id = 'vacmessage';
-        $input_vacmessage = new html_textarea(array(
-            'name' => $field_id,
-            'id' => $field_id,
-            'class' => 'mce_editor',
-            'rows' => 20,
-        ));
-        $table->add('title', html::label($field_id, rcube::Q($this->gettext('vacmessage'))));
-        $table->add(["colspan" => 2], $input_vacmessage->show($data['message']));
-        $table->add_row();
-
-        $field_id = 'vacforward';
-        $input_vacforward = new html_inputfield(array(
-            'name' => $field_id,
-            'id' => $field_id,
-        ));
-        $table->add('title', html::label($field_id, rcube::Q($this->gettext('vacforward'))));
-        $table->add(["colspan" => 2], $input_vacforward->show($data['forward']));
-        $table->add_row();
-
-        $submit_button = $this->rc->output->button(array(
-            'command' => 'plugin.cbits_vacation.save',
-            'class' => 'button mainaction submit',
-            'label' => 'save',
-        ));
-        $form_buttons = html::p(array('class' => 'formbuttons footerleft'), $submit_button);
-
-        $this->rc->output->add_gui_object('vacform', 'vacation-form');
+        $this->rc->output->add_gui_object('vacform', 'cbits_vacation-form');
 
         $this->include_script('cbits_vacation.js');
 
-        $form = $this->rc->output->form_tag(array(
-            'id' => 'vacation-form',
-            'name' => 'vacation-form',
+        return $this->rc->output->form_tag(array(
+            'id' => 'cbits_vacation-form',
+            'name' => 'cbits_vacation-form',
             'method' => 'post',
             'action' => './?_task=settings&_action=plugin.cbits_vacation.save',
-        ), $table->show());
-
-        return ""
-            . html::div(
-                array('id' => 'prefs-title', 'class' => 'boxtitle'),
-                $this->gettext('setvacation')
-            )
-            . html::div(
-                array('class' => 'box formcontainer scroller'),
-                html::div(
-                    array('class' => 'boxcontent formcontent'),
-                    $form
-                ) . $form_buttons
-            );
+        ), $output);
     }
 
     function get() {
         return $this->driver->get();
     }
 
-    function save($vacsettings) {
-        $this->driver->settings = $vacsettings;
-        return $this->driver->save();
+    function save($data) {
+        return $this->driver->save($data);
     }
 
     private function load_driver() {

@@ -22,10 +22,8 @@ class rcube_twentyi_vacation extends vacationdriver {
                     'message' => $responder->content,
                     'forward' => $responder->forwardTo,
                     'enabled' => $responder->enabled,
-                    'starttime' => (!is_null($start_datetime) ? $start_datetime->format('H:i') : ''),
-                    'endtime' => (!is_null($end_datetime) ? $end_datetime->format('H:i') : ''),
-                    'startdate' => (!is_null($start_datetime) ? $start_datetime->format('Y-m-d') : ''),
-                    'enddate' => (!is_null($end_datetime) ? $end_datetime->format('Y-m-d') : ''),
+                    'start_datetime' => (!is_null($start_datetime) ? $start_datetime->format('Y-m-d\TH:i') : ''),
+                    'end_datetime' => (!is_null($end_datetime) ? $end_datetime->format('Y-m-d\TH:i') : ''),
                 ];
             }
         }
@@ -34,26 +32,15 @@ class rcube_twentyi_vacation extends vacationdriver {
             'body' => '',
             'forward' => '',
             'enabled' => false,
+            'start_datetime' => '',
+            'end_datetime' => '',
         ];
     }
 
-    public function save() {
+    public function save($data) {
         $local = $this->user->username;
         $domain_name = $this->user->domain;
         $domain = $this->rest->getWithFields('https://api.20i.com/package/' . $domain_name . '/email/' . $domain_name);
-        if ($this->forward == '') {
-            $this->forward = null;
-        }
-
-        $startdatetime = ($this->settings['startdate'] == '') ? null : new DateTime($this->settings['startdate']);
-        $enddatetime = ($this->settings['enddate'] == '') ? null : new DateTime($this->settings['enddate']);
-
-        if (!is_null($startdatetime)) {
-            $startdatetime->setTime(...explode(':', $this->settings['starttime']));
-        }
-        if (!is_null($enddatetime)) {
-            $enddatetime->setTime(...explode(':', $this->settings['endtime']));
-        }
 
         foreach ($domain->responder as $responder) {
             if ($responder->local == $local && (str_starts_with($responder->id, 'r'))) {
@@ -61,12 +48,12 @@ class rcube_twentyi_vacation extends vacationdriver {
                     'update' => [
                         $responder->id => [
                             'subject' => 'Autoresponse - Re: $h_subject',
-                            'content' => $this->settings['message'],
-                            'forwardTo' => $this->settings['forward'],
-                            'enabled' => $this->settings['enabled'],
+                            'content' => $data['message'],
+                            'forwardTo' => $data['forward'],
+                            'enabled' => $data['enabled'],
                             'type' => 'text/html',
-                            'endTime' => (is_null($enddatetime)) ? null : $enddatetime->format('c'),
-                            'startTime' => (is_null($startdatetime)) ? null : $startdatetime->format('c'),
+                            'endTime' => $data['end_datetime']->format(DateTimeInterface::RFC3339_EXTENDED),
+                            'startTime' => $data['start_datetime']->format(DateTimeInterface::RFC3339_EXTENDED),
                         ]
                     ]
                 ];
@@ -78,12 +65,12 @@ class rcube_twentyi_vacation extends vacationdriver {
                 'responder' => [
                     'local' => $local,
                     'subject' => 'Autoresponse - Re: $h_subject',
-                    'content' => $this->settings['message'],
-                    'forwardTo' => $this->settings['forward'],
-                    'enabled' => $this->settings['enabled'],
+                    'content' => $data['message'],
+                    'forwardTo' => $data['forward'],
+                    'enabled' => $data['enabled'],
                     'type' => 'text/html',
-                    'endTime' => $enddatetime->format('c'),
-                    'startTime' => $startdatetime->format('c'),
+                    'endTime' => $data['end_datetime']->format(DateTimeInterface::RFC3339_EXTENDED),
+                    'startTime' => $data['start_datetime']->format(DateTimeInterface::RFC3339_EXTENDED),
                 ]
             ]
         ];
