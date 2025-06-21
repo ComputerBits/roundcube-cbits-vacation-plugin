@@ -119,14 +119,15 @@ class cbits_vacation extends rcube_plugin {
         $output = '<style>#layout-content { overflow: auto; height: 100%; }</style>';
 
         $output .= '<div style="margin: 1em;">';
+        $output .= '<h3>Out of Office Autoresponder Settings</h3>';
         $output .= html::div(['class' => 'form-group btn-group btn-group-toggle', 'data-toggle' => 'buttons'], ''
-            . html::label(['class' => $data['active'] == 'off' ? 'btn btn-secondary active' : 'btn btn-secondary'],
+            . html::label(['class' => $data['active'] == 'off' ? 'btn btn-outline-primary active' : 'btn btn-outline-primary'],
                 (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'off']) . "Off"
             )
-            . html::label(['class' => $data['active'] == 'on-indef' ? 'btn btn-secondary active' : 'btn btn-secondary'],
+            . html::label(['class' => $data['active'] == 'on-indef' ? 'btn btn-outline-primary active' : 'btn btn-outline-primary'],
                 (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'on-indef']) . "Enabled indefinitely"
             )
-            . html::label(['class' => $data['active'] == 'on-dates' ? 'btn btn-secondary active' : 'btn btn-secondary'],
+            . html::label(['class' => $data['active'] == 'on-dates' ? 'btn btn-outline-primary active' : 'btn btn-outline-primary'],
                 (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'on-dates']) . "Enabled between date range"
             )
         );
