@@ -114,44 +114,51 @@ class cbits_vacation extends rcube_plugin {
     function create_form() {
         $data = $this->data;
         $this->rc->html_editor('identity');
-
-        $fields = [
-            'active' => [
-                html::label('active', rcube::Q($this->gettext('vacenabled'))),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'off']) . "Off"),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'on-indef']) . "Enabled indefinitely"),
-                html::label([], (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'on-dates']) . "Enabled between date range"),
-            ],
-            'start_datetime' => [
-                html::label('start_datetime', rcube::Q($this->gettext('vacstartdate'))),
-                (new html_inputfield(['name' => 'start_datetime', 'type' => 'datetime-local']))->show($data['start_datetime']),
-            ],
-            'end_datetime' => [
-                html::label('end_datetime', rcube::Q($this->gettext('vacenddate'))),
-                (new html_inputfield(['name' => 'end_datetime', 'type' => 'datetime-local']))->show($data['end_datetime']),
-            ],
-            'forwarding_address' => [
-                html::label('forwarding_address', rcube::Q($this->gettext('vacforward'))),
-                (new html_inputfield(['name' => 'forwarding_address', 'type' => 'email']))->show($data['forward']),
-            ],
-            'message' => [
-                html::label('forwarding_address', rcube::Q($this->gettext('vacmessage'))),
-                (new html_textarea(['name' => 'message', 'id' => 'vacation-message']))->show($data['message'], ['class' => 'mce_editor']),
-            ],
-            'save' => [
-                $this->rc->output->button(array(
-                    'command' => 'plugin.cbits_vacation.save',
-                    'class' => 'button mainaction submit',
-                    'label' => 'save',
-                ))
-            ]
-        ];
-
         $output = '';
 
-        foreach ($fields as $id => $field) {
-            $output .= html::div(['id' => "vacation-$id-row"], join('', $field));
-        }
+        $output = '<style>#layout-content { overflow: auto; height: 100%; }</style>';
+
+        $output .= '<div style="margin: 1em;">';
+        $output .= html::div(['class' => 'form-group btn-group btn-group-toggle', 'data-toggle' => 'buttons'], ''
+            . html::label(['class' => $data['active'] == 'off' ? 'btn btn-secondary active' : 'btn btn-secondary'],
+                (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'off']) . "Off"
+            )
+            . html::label(['class' => $data['active'] == 'on-indef' ? 'btn btn-secondary active' : 'btn btn-secondary'],
+                (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'on-indef']) . "Enabled indefinitely"
+            )
+            . html::label(['class' => $data['active'] == 'on-dates' ? 'btn btn-secondary active' : 'btn btn-secondary'],
+                (new html_radiobutton(['name' => 'active']))->show($data['active'], ['value' => 'on-dates']) . "Enabled between date range"
+            )
+        );
+
+        $output .= html::div(['class' => 'form-group', 'id' => 'vacation-start_datetime-row'], ''
+            . html::label('start_datetime', rcube::Q($this->gettext('vacstartdate')))
+            . (new html_inputfield(['name' => 'start_datetime', 'type' => 'datetime-local', 'class' => 'form-control']))->show($data['start_datetime'])
+        );
+
+        $output .= html::div(['class' => 'form-group', 'id' => 'vacation-end_datetime-row'], ''
+            . html::label('end_datetime', rcube::Q($this->gettext('vacenddate')))
+            . (new html_inputfield(['name' => 'end_datetime', 'type' => 'datetime-local', 'class' => 'form-control']))->show($data['end_datetime'])
+        );
+
+        $output .= html::div(['class' => 'form-group', 'id' => 'vacation-forwarding_address-row'], ''
+            . html::label('forwarding_address', rcube::Q($this->gettext('vacforward')))
+            . (new html_inputfield(['name' => 'forwarding_address', 'type' => 'email', 'class' => 'form-control']))->show($data['forward'])
+            . html::tag('small', ['class' => 'form-test text-muted'], 'Forward a copy of the emails received to this address. Leave blank to not forward to anyone')
+        );
+
+        $output .= html::div(['class' => 'form-group', 'id' => 'vacation-message-row'], ''
+            . html::label('message', rcube::Q($this->gettext('vacmessage')))
+            . (new html_textarea(['name' => 'message', 'id' => 'vacation-message', 'class' => 'form-control']))->show($data['message'], ['class' => 'mce_editor'])
+        );
+
+        $output .= '<div>' . $this->rc->output->button(array(
+            'command' => 'plugin.cbits_vacation.save',
+            'class' => 'button mainaction submit',
+            'label' => 'save',
+        )) . '</div>';
+
+        $output .= '</div>';
 
         $this->rc->output->add_gui_object('vacform', 'cbits_vacation-form');
 
